@@ -1,0 +1,63 @@
+# Contexto del proyecto — léeme primero
+
+> Este fichero te pone al día rápido si arrancas una sesión nueva (ej. desde un pod remoto). El estado real está en los `day_XX/README.md`, pero esto te da los 30 segundos de contexto.
+
+## Quién soy yo (usuario)
+
+- Físico con base sólida en ML/AI. Quiere profundizar, no aprender 101.
+- Comunicación en **castellano**.
+- Intereses laterales: física, historia, economía (pueden aparecer en días futuros del challenge).
+
+## Qué es este proyecto
+
+**30 días de IA** — challenge público en GitHub + X. Cada día = algo distinto relacionado con ML / IA, idealmente cerrable en una sesión.
+
+Repo: https://github.com/sdv1997/30-days-of-ai
+
+## Día 1 — cerrado
+
+**Richter's Predictor** (DrivenData, predicción de daño en edificios tras terremoto Nepal 2015). Detalle completo en [day_01/README.md](day_01/README.md).
+
+Resumen:
+- **Resultado final: F1 0.7534 público, rank 55 / ~8.800 (top 0.6%).**
+- 5 iteraciones documentadas (1 negativa con target encoding, el resto positivas).
+- Pipeline ganador: ensemble simple (LightGBM + CatBoost beefier) con 56 features (38 originales + 18 derivadas: agregaciones por aldea y deltas edificio-vs-aldea).
+- Todo corrió en CPU local (Day 1 fue tabular).
+
+## Hardware — situación actual
+
+- Hasta Día 1: solo CPU local.
+- A partir de Día 2: **runpod community cloud con RTX A5000** (24 GB VRAM). Pod montado, VS Code Remote-SSH conectado. Pagas por hora (~$0.27/h), apagar cuando no se usa.
+- Cuando una sesión nueva arranque dentro del pod, los ficheros viven en `/workspace/30-days-of-ai/`.
+
+## Día 2 — propuesto (no decidido aún)
+
+**Conser-vision** (DrivenData, clasificación de imágenes de cámaras trampa, 8 clases, ~16k imágenes). Aún no arrancado. Ver `day_02/` cuando se cree.
+
+URL: https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/
+
+## Cómo trabajamos
+
+- **Solo ejecuta.** Una vez alineados sobre el qué, lanza código sin pedir permiso ni hacer preguntas de confirmación. Asume defaults razonables. Solo pregunta si algo es genuinamente bloqueante.
+- **No subir CSVs** (ni dataset original ni predicciones) al repo — `.gitignore` ya los excluye. Datos crudos se descargan manualmente de la plataforma.
+- **Honestidad sobre métricas:** experimentos negativos se cuentan (parte de la narrativa).
+- **Cada día deja artefactos en GitHub:** script reproducible + README + plot/output. Otros casi nada.
+- **CV ↔ leaderboard:** verificar que el gap CV→público sea pequeño y consistente. Si se ensancha, alerta de overfit al CV.
+
+## Convenciones del repo
+
+- `day_XX/` por día. Dentro: `README.md` + scripts mínimos + plots.
+- `data/` gitignored (CSVs / imágenes raw).
+- Submissions también gitignored (regenerables corriendo el pipeline).
+- Permisos de Claude Code en `bypassPermissions` en este proyecto (`.claude/settings.local.json`, también gitignored).
+
+## Stack
+
+Python 3.12, pandas, NumPy, scikit-learn, LightGBM, CatBoost, PyTorch (en pod cuando toque NN/CV), matplotlib. Sin frameworks pesados.
+
+## Lo que aprendí en Día 1 (lecciones transferibles)
+
+- En tabular con cardinalidad alta: cast `geo_level_*_id` a `category` antes de tunear nada — diferencia +0.03 F1.
+- LightGBM categórico nativo ya hace algo equivalente a target encoding internamente. TE explícito no aporta en esta familia de datos.
+- Stacking con 2 modelos correlacionados no aporta sobre el promedio simple — necesita más diversidad (XGBoost + LGBM + CatBoost) para brillar.
+- CV calibrada con 5-fold StratifiedKFold seed=42 y comparar todos los experimentos contra los mismos folds. Gap CV→público de -0.0008 (consistente).
