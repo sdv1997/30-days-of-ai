@@ -30,11 +30,17 @@ Resumen:
 - A partir de Día 2: **runpod community cloud con RTX A5000** (24 GB VRAM). Pod montado, VS Code Remote-SSH conectado. Pagas por hora (~$0.27/h), apagar cuando no se usa.
 - Cuando una sesión nueva arranque dentro del pod, los ficheros viven en `/workspace/30-days-of-ai/`.
 
-## Día 2 — propuesto (no decidido aún)
+## Día 2 — cerrado
 
-**Conser-vision** (DrivenData, clasificación de imágenes de cámaras trampa, 8 clases, ~16k imágenes). Aún no arrancado. Ver `day_02/` cuando se cree.
+**Conser-vision** (DrivenData, clasificación de imágenes de cámaras trampa). Detalle completo en [day_02/README.md](day_02/README.md).
 
-URL: https://www.drivendata.org/competitions/87/competition-image-classification-wildlife-conservation/
+Resumen:
+- **Resultado final: log-loss 0.8990 público, rank #18.**
+- Pipeline ganador: MegaDetectorV5 → crop al animal → ConvNeXt V2 Base fine-tuned.
+- CV site-disjoint (StratifiedGroupKFold por site) obligatorio — sin él el modelo aprende atajos del entorno.
+- MegaDetector fue la mejora más grande: bajó el LB de 1.2758 → 0.8990 (-0.377).
+- CV media 0.9479 con alta varianza entre folds (0.80 – 1.13) → el reto es generalización cross-site.
+- Corrió en RTX A5000: ~48 min detección + ~2h entrenamiento.
 
 ## Cómo trabajamos
 
@@ -54,6 +60,14 @@ URL: https://www.drivendata.org/competitions/87/competition-image-classification
 ## Stack
 
 Python 3.12, pandas, NumPy, scikit-learn, LightGBM, CatBoost, PyTorch (en pod cuando toque NN/CV), matplotlib. Sin frameworks pesados.
+
+## Lo que aprendí en Día 2 (lecciones transferibles)
+
+- **En camera trap classification, MegaDetector primero siempre.** Recortar al animal elimina el fondo site-específico y es la mejora más grande posible. Sin él el modelo aprende el entorno, no el animal.
+- **CV site-disjoint es no negociable** cuando train y test tienen sites distintos. CV con sites mezclados es trampa.
+- Pipeline two-stage (detector → clasificador) es el estándar en wildlife ML en producción. MegaDetector es open source y genérico — sirve para cualquier dataset de cámaras trampa.
+- Alta varianza entre folds en CV site-disjoint es información real, no ruido: refleja que algunos entornos son más difíciles de generalizar que otros.
+- Lanzar entrenamientos largos con `tmux`, no como background task de Claude Code (muere si se desconecta SSH).
 
 ## Lo que aprendí en Día 1 (lecciones transferibles)
 
