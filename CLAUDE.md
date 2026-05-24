@@ -10,7 +10,7 @@
 
 ## Qué es este proyecto
 
-**30 días de IA** — challenge público en GitHub + X. Cada día = algo distinto relacionado con ML / IA, idealmente cerrable en una sesión.
+**10 días de IA** — challenge público en GitHub + X. Cada día = algo distinto relacionado con ML / IA, idealmente cerrable en una sesión.
 
 Repo: https://github.com/sdv1997/30-days-of-ai
 
