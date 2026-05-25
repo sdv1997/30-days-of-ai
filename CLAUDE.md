@@ -71,6 +71,17 @@ Resumen:
 - La mejora clave fue aumentar el contexto de 6000 → 24.000 chars (+0.014 ROUGE-2), no el cambio de modelo.
 - `HF_HOME=/workspace/.cache/huggingface` obligatorio para no llenar el overlay raíz de 20 GB.
 
+## Día 4 — EN PROGRESO
+
+**BirdCLEF+ 2026** (Kaggle, identificar 234 especies en ventanas de 5s de soundscapes). Detalle completo y plan en [day_04/README.md](day_04/README.md).
+
+Estado:
+- Pipeline two-stage funcionando: teacher EfficientNet-B0 en clips → pseudo-label de soundscapes → fine-tune student → export ONNX (CPU, Kaggle 90 min).
+- **Phase 1 (clips): AUC 0.9804. Phase 2 (soundscapes): AUC 0.7757.** Aún sin submission. Top del LB ~0.94.
+- Métrica: ROC-AUC macro. Solo corrido fold 0.
+- **Cuello de botella = brecha de dominio focal→soundscape**: el teacher clava clips limpios pero cae en soundscapes ruidosos. Phase 2 hace plateau en ep5 y sobreajusta después.
+- **Plan próximo día (decidido): combinar (1) background-noise augmentation en Phase 1 + (2) backbone más fuerte `eca_nfnet_l0`.** Antes de relanzar: borrar `pseudo_fold0.npz` (pseudo-labels del teacher B0, hay que regenerarlos) y respaldar/borrar los `.pt`/`.onnx` (resume incompatible con arquitectura nueva).
+
 ## Lo que aprendí en Día 3 (lecciones transferibles)
 
 - **En summarización, el contexto importa más que el tamaño del modelo.** Pasar de 6000 a 24.000 chars (+0.014) superó con creces cambiar de 3B a 7B (+0.0004). Truncar la conclusión del paper es perder la mitad de la información relevante.
